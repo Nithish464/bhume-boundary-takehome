@@ -1,4 +1,4 @@
-"""Loading a village bundle and writing predictions in the contract format."""
+
 
 from __future__ import annotations
 
