@@ -1,4 +1,4 @@
-"""Self-scoring against the example truths."""
+
 
 from __future__ import annotations
 
