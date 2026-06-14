@@ -1,4 +1,3 @@
-"""A deliberately naive baseline — a floor to beat."""
 
 from __future__ import annotations
 
