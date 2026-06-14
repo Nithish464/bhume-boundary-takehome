@@ -1,8 +1,4 @@
-"""Raster + CRS helpers.
 
-The plots are EPSG:4326 (lon/lat); the imagery is EPSG:3857 (web-mercator metres). These
-functions hide that mismatch so you can think in lon/lat and pixels, not projections.
-"""
 
 from __future__ import annotations
 
