@@ -1,5 +1,3 @@
-"""Estimate a per-village global translation by cross-correlating rasterized plot
-outlines against the boundaries.tif edge-hint raster (no example_truths needed)."""
 
 from __future__ import annotations
 
@@ -10,9 +8,7 @@ from scipy.signal import fftconvolve
 
 
 def estimate_global_shift(village, max_shift_m: float = 30.0):
-    """Returns (dx, dy) in metres (boundaries.tif CRS / UTM-like web-mercator units)
-    that best aligns the official plot edges onto the boundary-hint raster.
-    """
+   
     if village.boundaries_path is None:
         return 0.0, 0.0, 0.0
 
@@ -23,7 +19,7 @@ def estimate_global_shift(village, max_shift_m: float = 30.0):
 
     plots_proj = village.plots.to_crs(crs)
 
-    # rasterize plot boundary lines (exteriors) onto the same grid as hints
+   
     shapes = []
     for geom in plots_proj.geometry:
         if geom is None or geom.is_empty:
@@ -36,10 +32,10 @@ def estimate_global_shift(village, max_shift_m: float = 30.0):
         shapes, out_shape=hints.shape, transform=transform, fill=0, dtype=np.uint8
     ).astype(np.float32)
 
-    # normalize / threshold hints
+   
     hints_bin = (hints > np.percentile(hints, 60)).astype(np.float32)
 
-    # cross-correlate via FFT (template matching): correlate official_mask with hints_bin
+  
     a = official_mask - official_mask.mean()
     b = hints_bin - hints_bin.mean()
     corr = fftconvolve(b, a[::-1, ::-1], mode='same')
@@ -53,7 +49,7 @@ def estimate_global_shift(village, max_shift_m: float = 30.0):
     dy_px = peak_idx[0] - max_shift_px
     dx_px = peak_idx[1] - max_shift_px
 
-    # transform.a is pixel width (x), transform.e is pixel height (often negative)
+    
     dx_m = dx_px * transform.a
     dy_m = dy_px * transform.e
 
