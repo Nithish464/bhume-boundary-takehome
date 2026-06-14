@@ -1,15 +1,4 @@
-"""Per-plot correction pipeline.
 
-For each plot:
-  1. Apply the village-level global shift to the official geometry.
-  2. Crop a local patch of boundaries.tif around the shifted plot.
-  3. Cross-correlate the shifted plot's outline mask against the local edge evidence to
-     find a small local refinement (dx, dy), bounded to a few metres.
-  4. Compute a confidence from: correlation peak sharpness, edge density under/near the
-     plot, and how close the drawn area is to the recorded area (map_area vs recorded+pot_kharaba).
-  5. Flag the plot (keep official geometry) when the area ratio is far from 1.0, or when
-     local edge evidence is too weak/ambiguous to trust a correction.
-"""
 
 from __future__ import annotations
 
@@ -157,12 +146,6 @@ def correct_village(village, global_dx=None, global_dy=None) -> gpd.GeoDataFrame
 
             ratio = _area_ratio(row)
 
-            # Validate the global shift per-plot: only trust it if it leads to a
-            # stronger local correlation than not applying it at all. This makes the
-            # method self-correcting if the village-wide estimate was spurious (e.g.
-            # a repeating-pattern artifact in dense, small-plot villages). Both
-            # candidates are correlated against the same crop (covering both
-            # positions) to avoid a second raster read.
             shifted_with = translate(geom, global_dx, global_dy)
             combined_bounds = (
                 min(geom.bounds[0], shifted_with.bounds[0]),
@@ -184,10 +167,6 @@ def correct_village(village, global_dx=None, global_dy=None) -> gpd.GeoDataFrame
                 geom, crop, crop_transform, edge_thresh, LOCAL_MAX_SHIFT_M, pad_px
             )
 
-            # Require the global-shift candidate to clearly outperform the unshifted
-            # candidate (not just tie) — a small margin avoids flip-flopping on noise,
-            # and an ambiguous case (close strengths) is treated as the global shift
-            # not being locally supported for this plot.
             margin = strength_w - strength_wo
             if margin > 0.5:
                 base_dx, base_dy = global_dx, global_dy
